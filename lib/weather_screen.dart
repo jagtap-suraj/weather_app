@@ -24,7 +24,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
     try {
       String cityName = 'Mumbai';
 
-
       await dotenv.load();
       final openWeatherAPIkeyp = dotenv.env['OPEN_WEATHER_API_KEY'];
 
@@ -60,12 +59,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   double convertToCelsius(double temperature) {
-    // convert to celsius
-    temperature = temperature - 273.15;
+    double tempCelsius = temperature - 273.15;
+
     if (temperatureUnit == '°F') {
-      return temperature * 9 / 5 + 32;
+      return (tempCelsius * 9 / 5) + 32.0;
     }
-    return temperature;
+
+    return tempCelsius;
   }
 
   @override
@@ -187,17 +187,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   height: 150,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
+                    itemCount: data['list'].length - 1,
                     itemBuilder: (context, index) {
                       final hourlyForecast = data['list'][index + 1];
                       final time = DateTime.parse(hourlyForecast['dt_txt']);
+                      final double temp = hourlyForecast['main']['temp'].toDouble();
                       return HourlyForecastItem(
                         time: DateFormat.jm().format(time),
-                        temperature: '${convertToCelsius(hourlyForecast['main']['temp']).toStringAsFixed(1)}$temperatureUnit',
+                        temperature: '${convertToCelsius(temp).toStringAsFixed(1)}$temperatureUnit',
                         iconUrl: 'http://openweathermap.org/img/wn/${hourlyForecast['weather'][0]['icon']}.png',
                       );
                     },
                   ),
                 ),
+
                 const SizedBox(
                   height: 20,
                 ),
@@ -210,7 +213,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 8,
+                  height: 16,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
